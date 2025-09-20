@@ -253,11 +253,6 @@ def main():
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        # 渲染游戏板
-        game_state = game.get_game_state()
-        game_html = render_game_board(game_state)
-        st.markdown(game_html, unsafe_allow_html=True)
-        
         # 游戏统计
         st.markdown("---")
         col_score, col_length = st.columns(2)
@@ -296,122 +291,57 @@ def main():
         time.sleep(0.5)
         st.rerun()
     
-    # 键盘控制说明
-    st.markdown("### 🎮 键盘控制")
+    # 鼠标控制说明
+    st.markdown("### 🖱️ 鼠标控制")
     st.markdown("""
-    **使用键盘控制游戏：**
-    - **↑** 或 **W** - 向上移动
-    - **↓** 或 **S** - 向下移动  
-    - **←** 或 **A** - 向左移动
-    - **→** 或 **D** - 向右移动
+    **使用鼠标控制游戏：**
+    - **点击方向按钮** - 蛇会朝点击的方向移动
     - **空格键** - 暂停/继续游戏
     """)
     
-    # 使用按钮控制方向
-    st.markdown("**方向控制按钮：**")
+    # 创建鼠标点击控制按钮
+    st.markdown("**点击按钮控制蛇的移动方向！**")
+    
+    # 方向控制按钮
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("⬅️ 左", key="btn_left"):
+        if st.button("⬅️ 左", key="mouse_left", help="点击向左移动"):
             game.change_direction((-1, 0))
             st.rerun()
     
     with col2:
         col_up, col_down = st.columns(2)
         with col_up:
-            if st.button("⬆️ 上", key="btn_up"):
+            if st.button("⬆️ 上", key="mouse_up", help="点击向上移动"):
                 game.change_direction((0, -1))
                 st.rerun()
         with col_down:
-            if st.button("⬇️ 下", key="btn_down"):
+            if st.button("⬇️ 下", key="mouse_down", help="点击向下移动"):
                 game.change_direction((0, 1))
                 st.rerun()
     
     with col3:
-        if st.button("➡️ 右", key="btn_right"):
+        if st.button("➡️ 右", key="mouse_right", help="点击向右移动"):
             game.change_direction((1, 0))
             st.rerun()
     
-    # 使用更简单的方法：直接使用按钮触发
-    st.markdown("**键盘控制 (点击按钮或使用键盘)：**")
+    # 渲染游戏板
+    game_state = game.get_game_state()
+    game_html = render_game_board(game_state)
+    st.markdown(game_html, unsafe_allow_html=True)
     
-    # 创建键盘控制的按钮
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("W - 上", key="key_w"):
-            game.change_direction((0, -1))
-            st.rerun()
-    
-    with col2:
-        col_up, col_down = st.columns(2)
-        with col_up:
-            if st.button("A - 左", key="key_a"):
-                game.change_direction((-1, 0))
-                st.rerun()
-        with col_down:
-            if st.button("S - 下", key="key_s"):
-                game.change_direction((0, 1))
-                st.rerun()
-    
-    with col3:
-        if st.button("D - 右", key="key_d"):
-            game.change_direction((1, 0))
-            st.rerun()
-    
-    # 添加键盘监听脚本
+    # 添加空格键暂停功能
     st.markdown("""
     <script>
-    // 键盘监听
+    // 空格键暂停功能
     document.addEventListener('keydown', function(event) {
-        const key = event.key.toLowerCase();
-        console.log('按键检测:', key); // 调试信息
-        
-        // 查找按钮并点击
-        if (key === 'w') {
-            const buttons = document.querySelectorAll('button');
-            for (let btn of buttons) {
-                if (btn.textContent.includes('W - 上')) {
-                    btn.click();
-                    console.log('W按钮被点击');
-                    break;
-                }
-            }
-        } else if (key === 's') {
-            const buttons = document.querySelectorAll('button');
-            for (let btn of buttons) {
-                if (btn.textContent.includes('S - 下')) {
-                    btn.click();
-                    console.log('S按钮被点击');
-                    break;
-                }
-            }
-        } else if (key === 'a') {
-            const buttons = document.querySelectorAll('button');
-            for (let btn of buttons) {
-                if (btn.textContent.includes('A - 左')) {
-                    btn.click();
-                    console.log('A按钮被点击');
-                    break;
-                }
-            }
-        } else if (key === 'd') {
-            const buttons = document.querySelectorAll('button');
-            for (let btn of buttons) {
-                if (btn.textContent.includes('D - 右')) {
-                    btn.click();
-                    console.log('D按钮被点击');
-                    break;
-                }
-            }
-        } else if (key === ' ') {
-            // 空格键暂停
+        if (event.key === ' ') {
             event.preventDefault();
             const buttons = document.querySelectorAll('button');
             for (let btn of buttons) {
                 if (btn.textContent.includes('暂停') || btn.textContent.includes('继续')) {
                     btn.click();
-                    console.log('暂停按钮被点击');
                     break;
                 }
             }
