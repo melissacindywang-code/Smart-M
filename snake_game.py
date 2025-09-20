@@ -307,55 +307,100 @@ def main():
     - **空格键** - 暂停/继续游戏
     """)
     
-    # 使用selectbox作为键盘控制
-    direction_options = {
-        "选择方向": None,
-        "↑ 向上": (0, -1),
-        "↓ 向下": (0, 1),
-        "← 向左": (-1, 0),
-        "→ 向右": (1, 0)
-    }
+    # 使用按钮控制方向
+    st.markdown("**方向控制按钮：**")
+    col1, col2, col3 = st.columns(3)
     
-    selected_direction = st.selectbox("键盘控制", list(direction_options.keys()), key="direction_control")
+    with col1:
+        if st.button("⬅️ 左", key="btn_left"):
+            game.change_direction((-1, 0))
+            st.rerun()
     
-    # 处理方向选择
-    if selected_direction != "选择方向" and direction_options[selected_direction]:
-        game.change_direction(direction_options[selected_direction])
-        st.rerun()
+    with col2:
+        col_up, col_down = st.columns(2)
+        with col_up:
+            if st.button("⬆️ 上", key="btn_up"):
+                game.change_direction((0, -1))
+                st.rerun()
+        with col_down:
+            if st.button("⬇️ 下", key="btn_down"):
+                game.change_direction((0, 1))
+                st.rerun()
     
-    # 添加JavaScript键盘监听
+    with col3:
+        if st.button("➡️ 右", key="btn_right"):
+            game.change_direction((1, 0))
+            st.rerun()
+    
+    # 使用更简单的键盘控制方法
+    st.markdown("**键盘控制输入框：**")
+    key_input = st.text_input("按方向键控制 (点击这里然后按键盘)", 
+                              placeholder="点击这里，然后使用键盘方向键", 
+                              key="keyboard_input",
+                              help="点击输入框后，使用键盘方向键或WASD键控制蛇的移动")
+    
+    # 处理键盘输入
+    if key_input:
+        # 清空输入框
+        st.session_state.keyboard_input = ""
+        
+        # 检测按键并改变方向
+        if key_input.lower() in ['w', '↑']:
+            game.change_direction((0, -1))
+            st.rerun()
+        elif key_input.lower() in ['s', '↓']:
+            game.change_direction((0, 1))
+            st.rerun()
+        elif key_input.lower() in ['a', '←']:
+            game.change_direction((-1, 0))
+            st.rerun()
+        elif key_input.lower() in ['d', '→']:
+            game.change_direction((1, 0))
+            st.rerun()
+        elif key_input == ' ':
+            game.toggle_pause()
+            st.rerun()
+    
+    # 添加JavaScript来捕获键盘输入
     st.markdown("""
     <script>
-    document.addEventListener('keydown', function(event) {
-        const key = event.key;
-        const selectbox = document.querySelector('select[aria-label*="键盘控制"]');
+    // 让输入框获得焦点并监听键盘事件
+    const input = document.querySelector('input[placeholder*="按方向键控制"]');
+    if (input) {
+        input.focus();
         
-        if (selectbox) {
-            if (key === 'ArrowUp' || key.toLowerCase() === 'w') {
-                selectbox.value = '↑ 向上';
-            } else if (key === 'ArrowDown' || key.toLowerCase() === 's') {
-                selectbox.value = '↓ 向下';
-            } else if (key === 'ArrowLeft' || key.toLowerCase() === 'a') {
-                selectbox.value = '← 向左';
-            } else if (key === 'ArrowRight' || key.toLowerCase() === 'd') {
-                selectbox.value = '→ 向右';
+        input.addEventListener('keydown', function(event) {
+            const key = event.key;
+            
+            // 根据按键设置输入值
+            if (key === 'ArrowUp') {
+                input.value = '↑';
+            } else if (key === 'ArrowDown') {
+                input.value = '↓';
+            } else if (key === 'ArrowLeft') {
+                input.value = '←';
+            } else if (key === 'ArrowRight') {
+                input.value = '→';
             } else if (key === ' ') {
-                // 空格键暂停/继续
-                event.preventDefault();
-                // 触发暂停按钮点击
-                const pauseButton = document.querySelector('button[kind="secondary"]');
-                if (pauseButton && pauseButton.textContent.includes('暂停')) {
-                    pauseButton.click();
-                }
+                input.value = ' ';
+            } else if (key.toLowerCase() === 'w') {
+                input.value = 'w';
+            } else if (key.toLowerCase() === 's') {
+                input.value = 's';
+            } else if (key.toLowerCase() === 'a') {
+                input.value = 'a';
+            } else if (key.toLowerCase() === 'd') {
+                input.value = 'd';
             }
             
-            // 触发change事件
-            selectbox.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    });
+            // 触发输入事件
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
     </script>
     """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
+
 
