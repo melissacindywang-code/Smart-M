@@ -332,71 +332,91 @@ def main():
             game.change_direction((1, 0))
             st.rerun()
     
-    # 使用更简单的键盘控制方法
-    st.markdown("**键盘控制输入框：**")
-    key_input = st.text_input("按方向键控制 (点击这里然后按键盘)", 
-                              placeholder="点击这里，然后使用键盘方向键", 
-                              key="keyboard_input",
-                              help="点击输入框后，使用键盘方向键或WASD键控制蛇的移动")
+    # 使用更简单的方法：直接使用按钮触发
+    st.markdown("**键盘控制 (点击按钮或使用键盘)：**")
     
-    # 处理键盘输入
-    if key_input:
-        # 清空输入框
-        st.session_state.keyboard_input = ""
-        
-        # 检测按键并改变方向
-        if key_input.lower() in ['w', '↑']:
+    # 创建键盘控制的按钮
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("W - 上", key="key_w"):
             game.change_direction((0, -1))
             st.rerun()
-        elif key_input.lower() in ['s', '↓']:
-            game.change_direction((0, 1))
-            st.rerun()
-        elif key_input.lower() in ['a', '←']:
-            game.change_direction((-1, 0))
-            st.rerun()
-        elif key_input.lower() in ['d', '→']:
+    
+    with col2:
+        col_up, col_down = st.columns(2)
+        with col_up:
+            if st.button("A - 左", key="key_a"):
+                game.change_direction((-1, 0))
+                st.rerun()
+        with col_down:
+            if st.button("S - 下", key="key_s"):
+                game.change_direction((0, 1))
+                st.rerun()
+    
+    with col3:
+        if st.button("D - 右", key="key_d"):
             game.change_direction((1, 0))
             st.rerun()
-        elif key_input == ' ':
-            game.toggle_pause()
-            st.rerun()
     
-    # 添加JavaScript来捕获键盘输入
+    # 添加键盘监听脚本
     st.markdown("""
     <script>
-    // 让输入框获得焦点并监听键盘事件
-    const input = document.querySelector('input[placeholder*="按方向键控制"]');
-    if (input) {
-        input.focus();
+    // 键盘监听
+    document.addEventListener('keydown', function(event) {
+        const key = event.key.toLowerCase();
+        console.log('按键检测:', key); // 调试信息
         
-        input.addEventListener('keydown', function(event) {
-            const key = event.key;
-            
-            // 根据按键设置输入值
-            if (key === 'ArrowUp') {
-                input.value = '↑';
-            } else if (key === 'ArrowDown') {
-                input.value = '↓';
-            } else if (key === 'ArrowLeft') {
-                input.value = '←';
-            } else if (key === 'ArrowRight') {
-                input.value = '→';
-            } else if (key === ' ') {
-                input.value = ' ';
-            } else if (key.toLowerCase() === 'w') {
-                input.value = 'w';
-            } else if (key.toLowerCase() === 's') {
-                input.value = 's';
-            } else if (key.toLowerCase() === 'a') {
-                input.value = 'a';
-            } else if (key.toLowerCase() === 'd') {
-                input.value = 'd';
+        // 查找按钮并点击
+        if (key === 'w') {
+            const buttons = document.querySelectorAll('button');
+            for (let btn of buttons) {
+                if (btn.textContent.includes('W - 上')) {
+                    btn.click();
+                    console.log('W按钮被点击');
+                    break;
+                }
             }
-            
-            // 触发输入事件
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-    }
+        } else if (key === 's') {
+            const buttons = document.querySelectorAll('button');
+            for (let btn of buttons) {
+                if (btn.textContent.includes('S - 下')) {
+                    btn.click();
+                    console.log('S按钮被点击');
+                    break;
+                }
+            }
+        } else if (key === 'a') {
+            const buttons = document.querySelectorAll('button');
+            for (let btn of buttons) {
+                if (btn.textContent.includes('A - 左')) {
+                    btn.click();
+                    console.log('A按钮被点击');
+                    break;
+                }
+            }
+        } else if (key === 'd') {
+            const buttons = document.querySelectorAll('button');
+            for (let btn of buttons) {
+                if (btn.textContent.includes('D - 右')) {
+                    btn.click();
+                    console.log('D按钮被点击');
+                    break;
+                }
+            }
+        } else if (key === ' ') {
+            // 空格键暂停
+            event.preventDefault();
+            const buttons = document.querySelectorAll('button');
+            for (let btn of buttons) {
+                if (btn.textContent.includes('暂停') || btn.textContent.includes('继续')) {
+                    btn.click();
+                    console.log('暂停按钮被点击');
+                    break;
+                }
+            }
+        }
+    });
     </script>
     """, unsafe_allow_html=True)
 
