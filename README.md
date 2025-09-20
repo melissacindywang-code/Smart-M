@@ -108,7 +108,7 @@ gh repo create melissacindywang-code/Smart-M --public
 - **主文件**: `snake_game.py`
 - **依赖文件**: `requirements.txt`
 - **配置文件**: `.streamlit/config.toml`
-- **系统包**: `packages.txt` (空文件，无需额外包)
+- **系统包**: 无需额外系统包
 
 ## 🛠️ 技术栈
 
