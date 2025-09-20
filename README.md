@@ -63,11 +63,52 @@ Smart-M/
 
 ## 🌐 部署到Streamlit Cloud
 
-1. 将代码推送到GitHub仓库
-2. 访问 [Streamlit Cloud](https://share.streamlit.io/)
-3. 连接GitHub仓库
-4. 选择主文件为 `snake_game.py`
-5. 点击部署
+### 方法1：通过Streamlit Cloud网站部署
+
+1. **推送代码到GitHub**：
+   ```bash
+   git push origin main
+   ```
+
+2. **访问Streamlit Cloud**：
+   - 打开 [Streamlit Cloud](https://share.streamlit.io/)
+   - 使用GitHub账号登录
+
+3. **部署应用**：
+   - 点击 "New app"
+   - 选择仓库：`melissacindywang-code/Smart-M`
+   - 选择分支：`main`
+   - 主文件路径：`snake_game.py`
+   - 点击 "Deploy!"
+
+### 方法2：使用GitHub CLI部署
+
+```bash
+# 安装GitHub CLI (如果未安装)
+# brew install gh  # macOS
+# 或访问 https://cli.github.com/
+
+# 登录GitHub
+gh auth login
+
+# 推送代码
+git push origin main
+
+# 部署到Streamlit Cloud
+gh repo create melissacindywang-code/Smart-M --public
+```
+
+### 部署后访问
+
+部署成功后，您将获得一个类似这样的URL：
+`https://smart-m-snake-game.streamlit.app/`
+
+### 部署配置说明
+
+- **主文件**: `snake_game.py`
+- **依赖文件**: `requirements.txt`
+- **配置文件**: `.streamlit/config.toml`
+- **系统包**: `packages.txt` (空文件，无需额外包)
 
 ## 🛠️ 技术栈
 
