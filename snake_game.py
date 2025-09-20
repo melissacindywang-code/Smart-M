@@ -90,8 +90,93 @@ class SnakeGame:
             'eat_message_time': self.eat_message_time
         }
 
+def render_clickable_game_board(game_state: dict) -> str:
+    """渲染可点击的游戏板为HTML"""
+    width = game_state['width']
+    height = game_state['height']
+    snake = game_state['snake']
+    food = game_state['food']
+    game_over = game_state['game_over']
+    paused = game_state['paused']
+    
+    # 获取蛇头位置
+    head_x, head_y = snake[0] if snake else (width//2, height//2)
+    
+    # 创建游戏板
+    board = [['' for _ in range(width)] for _ in range(height)]
+    
+    # 放置食物
+    board[food[1]][food[0]] = '🍎'
+    
+    # 放置蛇
+    for i, (x, y) in enumerate(snake):
+        if i == 0:  # 蛇头
+            board[y][x] = '🐍'
+        else:  # 蛇身
+            board[y][x] = '🟢'
+    
+    # 生成HTML表格
+    html = '<div style="display: flex; justify-content: center; margin: 20px 0;">'
+    html += '<table style="border-collapse: collapse; border: 3px solid #333; background-color: #2d5016; cursor: pointer;">'
+    
+    for y in range(height):
+        html += '<tr>'
+        for x in range(width):
+            cell = board[y][x]
+            
+            if cell:
+                html += f'<td style="width: 30px; height: 30px; border: 1px solid #555; text-align: center; font-size: 20px; cursor: pointer;" onclick="handleCellClick({x}, {y})">{cell}</td>'
+            else:
+                html += f'<td style="width: 30px; height: 30px; border: 1px solid #555; background-color: #2d5016; cursor: pointer;" onclick="handleCellClick({x}, {y})"></td>'
+        html += '</tr>'
+    
+    html += '</table></div>'
+    
+    # 添加JavaScript处理点击事件
+    html += f'''
+    <script>
+    function handleCellClick(x, y) {{
+        // 设置输入框的值
+        const input = document.querySelector('input[aria-label*="点击坐标"]');
+        if (input) {{
+            input.value = x + ',' + y;
+            input.dispatchEvent(new Event('input', {{ bubbles: true }}));
+        }}
+    }}
+    </script>
+    '''
+    
+    # 添加游戏状态信息
+    if game_over:
+        html += '<div style="text-align: center; color: #ff4444; font-size: 24px; font-weight: bold; margin: 20px 0;">游戏结束！</div>'
+    elif paused:
+        html += '<div style="text-align: center; color: #ffaa00; font-size: 20px; font-weight: bold; margin: 20px 0;">游戏暂停</div>'
+    
+    # 添加吃食物的文字效果
+    if game_state.get('show_eat_message', False):
+        current_time = time.time()
+        if current_time - game_state.get('eat_message_time', 0) < 2.0:  # 显示2秒
+            html += '''
+            <div style="text-align: center; margin: 20px 0;">
+                <div style="color: #00ff00; font-size: 28px; font-weight: bold; 
+                           text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                           animation: bounce 0.5s ease-in-out;">
+                    🎉 你太棒了！ 🎉
+                </div>
+            </div>
+            <style>
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-10px); }
+                60% { transform: translateY(-5px); }
+            }
+            </style>
+            '''
+    
+    return html
+
 def render_game_board(game_state: dict) -> str:
-    """渲染游戏板为HTML"""
+    """渲染游戏板为HTML（非点击版本）"""
     width = game_state['width']
     height = game_state['height']
     snake = game_state['snake']
@@ -295,41 +380,46 @@ def main():
     st.markdown("### 🖱️ 鼠标控制")
     st.markdown("""
     **使用鼠标控制游戏：**
-    - **点击方向按钮** - 蛇会朝点击的方向移动
+    - **点击游戏板** - 蛇会朝点击的方向移动
     - **空格键** - 暂停/继续游戏
     """)
     
-    # 创建鼠标点击控制按钮
-    st.markdown("**点击按钮控制蛇的移动方向！**")
-    
-    # 方向控制按钮
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("⬅️ 左", key="mouse_left", help="点击向左移动"):
-            game.change_direction((-1, 0))
-            st.rerun()
-    
-    with col2:
-        col_up, col_down = st.columns(2)
-        with col_up:
-            if st.button("⬆️ 上", key="mouse_up", help="点击向上移动"):
-                game.change_direction((0, -1))
-                st.rerun()
-        with col_down:
-            if st.button("⬇️ 下", key="mouse_down", help="点击向下移动"):
-                game.change_direction((0, 1))
-                st.rerun()
-    
-    with col3:
-        if st.button("➡️ 右", key="mouse_right", help="点击向右移动"):
-            game.change_direction((1, 0))
-            st.rerun()
-    
-    # 渲染游戏板
+    # 渲染可点击的游戏板
     game_state = game.get_game_state()
-    game_html = render_game_board(game_state)
+    game_html = render_clickable_game_board(game_state)
     st.markdown(game_html, unsafe_allow_html=True)
+    
+    # 使用Streamlit组件处理点击
+    import json
+    
+    # 创建隐藏的点击输入组件
+    click_data = st.text_input("点击坐标", key="click_input", help="点击游戏板上的位置", label_visibility="collapsed")
+    
+    if click_data:
+        try:
+            # 解析点击坐标
+            x, y = map(int, click_data.split(','))
+            
+            # 获取蛇头位置
+            head_x, head_y = game.snake[0] if game.snake else (game.width//2, game.height//2)
+            
+            # 计算方向
+            dx = x - head_x
+            dy = y - head_y
+            
+            if abs(dx) > abs(dy):
+                direction = (1, 0) if dx > 0 else (-1, 0)
+            elif dy != 0:
+                direction = (0, 1) if dy > 0 else (0, -1)
+            else:
+                direction = None
+            
+            if direction:
+                game.change_direction(direction)
+                st.session_state.click_input = ""
+                st.rerun()
+        except:
+            pass
     
     # 添加空格键暂停功能
     st.markdown("""
